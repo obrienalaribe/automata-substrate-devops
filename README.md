@@ -2,18 +2,16 @@
 
 ## Question 1
 
-For a stateful peer to peer application such as this, there would be a lot of replication required in production which means high IOPS is of more importance than CPU. Using an SSD to facilitate faster read/write will be essential. Multithreading or having multiple CPU cores might not be as crucial here. Memory will need to be high as well
+For a stateful peer to peer network, we expect high IOPS and high memory usuage. Using an SSD to facilitate faster read/write will help boost performance. However more storage can be attached to the cluster as time goes on in a predictable manner which then leaves us with managing CPU & Memory within the cluster which can be quite unpreditable due to spikes in the network from high computation.
 
-Vertical Pod autoscaling in Auto mode
-Due to Kubernetes limitations, the only way to modify the resource requests of a running Pod is to recreate the Pod. If you create a VerticalPodAutoscaler object with an updateMode of Auto, the VerticalPodAutoscaler evicts a Pod if it needs to change the Pod's resource requests. Given that this application is a statefulset order and network identity (i.e dns) is maintained during this scale up event which in turn shouldnt affect the p2p network
+### Vertical Pod Autoscaling
 
-To limit the amount of Pod restarts, use a Pod disruption budget. To ensure that your cluster can handle the new sizes of your workloads, use cluster autoscaler and node auto-provisioning.
+Using a Vertical Pod autoscaling is the best solution because you don't have to run time-consuming benchmarking tasks to determine the correct values for CPU and Memory requests.
 
-Vertical Pod autoscaling notifies the cluster autoscaler ahead of the update, and provides the resources needed for the resized workload before recreating the the workload, to minimize the disruption time.
+Vertical Pod autoscaling ensures the pods in the cluster scales to accommodate network demand. It does this by notifying the cluster autoscaler ahead of an update, and scales the resources (i.e nodes) needed for the resized workload before recreating the pods, this minimizes the disruption time. Given this is a statefulset the network identity (i.e DNS) and persisted state remains intact during the pod recreation.
 
-Using a Vertical Pod autoscaling is the best solution because you don't have to run time-consuming benchmarking tasks to determine the correct values for CPU and memory requests.
+Horizontal Pod Autoscaling might not be the best scaling method here especially when a fixed set of nodes are required to keep the network running. Also both HPA & VPA dont always work best together as they are competing on the same resources
 
-This means Reduced maintenance time because the autoscaler can adjust CPU and memory requests over time on both the cluster and the node without any manual intervention
 
 ## Question 2
 
